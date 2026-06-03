@@ -517,7 +517,7 @@ const EventBook: React.FC<EventBookProps> = ({ data }): React.JSX.Element => {
       </div>
     </Page>,
 
-    <CoverPage key="p26" title="FIN" subtitle="The End of the Beginning" density="hard" />
+    <CoverPage key="p26" title="FINISH" subtitle="The End of the Beginning" density="hard" />
   ], [bookData])
 
   return (

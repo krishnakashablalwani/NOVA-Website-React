@@ -13,65 +13,121 @@ import {
   Lock,
   Shield,
   ExternalLink,
+  Code,
+  Terminal,
+  Cpu,
+  Trophy,
+  MessageSquareText,
+  X,
+  Activity
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import DashboardSidebar from '../components/dashboard/DashboardSidebar'
-import CarouselSlider from '../components/dashboard/CarouselSlider'
-import { buildAnnouncementSlides, buildActivitySlides } from '@/configs/dashboardCarouselConfig'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import MvsrChatbot from '../components/MvsrChatbot'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+// --- HELPER UI COMPONENTS FOR GAMIFIED DASHBOARD ---
+
+const TimelineCard = ({ tag, title, desc, date, status }: any) => {
+  const statusColors = {
+    active: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400',
+    completed: 'border-purple-500/50 bg-purple-500/10 text-purple-400',
+    pending: 'border-amber-500/50 bg-amber-500/10 text-amber-400'
+  }
+  
+  const currentStatus = statusColors[status as keyof typeof statusColors] || statusColors.pending;
+
+  return (
+    <div className="min-w-[280px] w-[280px] shrink-0 snap-start h-full flex flex-col justify-between p-5 bg-slate-900 border border-slate-800 hover:border-slate-600 transition-colors rounded-xl shadow-lg shadow-black/20">
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded border uppercase", currentStatus)}>
+            {tag}
+          </span>
+          <span className="text-xs text-slate-500 font-mono">{date}</span>
+        </div>
+        <h3 className="font-semibold text-slate-100 text-base mb-2 tracking-tight">{title}</h3>
+        <p className="text-sm text-slate-400 leading-relaxed line-clamp-3">{desc}</p>
+      </div>
+      <div className="mt-4 pt-3 border-t border-slate-800 flex items-center text-xs text-slate-500 group cursor-pointer hover:text-emerald-400 transition-colors">
+        <span className="font-mono">VIEW_DETAILS</span>
+        <ArrowRight className="size-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    </div>
+  )
+}
+
+const ModuleCard = ({ icon, label, value, glow }: any) => {
+  const glowMap = {
+    emerald: 'group-hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] text-emerald-400 bg-emerald-500/10',
+    indigo: 'group-hover:shadow-[0_0_20px_rgba(99,102,241,0.15)] text-indigo-400 bg-indigo-500/10',
+    amber: 'group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] text-amber-400 bg-amber-500/10',
+    pink: 'group-hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] text-pink-400 bg-pink-500/10',
+  }
+  
+  const currentGlow = glowMap[glow as keyof typeof glowMap];
+
+  return (
+    <div className={cn("p-4 bg-slate-900 border border-slate-800 rounded-xl transition-all duration-300 group hover:bg-slate-800/80 cursor-default", currentGlow.split(' ')[0])}>
+      <div className="flex items-center justify-between mb-3">
+        <div className={cn("p-2 rounded-lg", currentGlow.split(' ').slice(1).join(' '))}>
+          {React.cloneElement(icon, { className: "size-5" })}
+        </div>
+        <Activity className="size-4 text-slate-700 opacity-50" />
+      </div>
+      <p className="text-2xl font-bold text-slate-100 font-mono tracking-tight mb-1">{value}</p>
+      <p className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">{label}</p>
+    </div>
+  )
+}
+
+const BadgeIcon = ({ active, icon, color, bg, border, tooltip }: any) => (
+  <div className="group relative flex flex-col items-center">
+    <div className={cn(
+      "p-3 rounded-xl border transition-all duration-300",
+      active ? `${bg} ${border} shadow-[0_0_15px_rgba(0,0,0,0.5)]` : "bg-slate-900/50 border-dashed border-slate-800 grayscale opacity-50",
+      active ? "hover:scale-105 cursor-help" : ""
+    )}>
+      {React.cloneElement(icon, { className: cn("size-6", active ? color : "text-slate-600") })}
+    </div>
+    
+    {/* Tooltip */}
+    <div className="absolute -top-10 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-slate-800 text-slate-200 text-xs py-1 px-2 rounded font-mono whitespace-nowrap z-10 shadow-xl border border-slate-700 pointer-events-none">
+      {tooltip}
+      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
+    </div>
+  </div>
+)
+
+
+// --- MAIN DASHBOARD COMPONENT ---
 
 const Dashboard: React.FC = () => {
   const { user, isLoaded } = useUser()
   const { getToken } = useAuth()
   const [activeSection, setActiveSection] = useState('overview')
-  const [userPoints, setUserPoints] = useState<number>(0)
+  const [userPoints, setUserPoints] = useState<number>(450) // Default for gamification demonstration
   const [userRole, setUserRole] = useState<string>('student')
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('nova-dashboard-theme')
-      if (stored) return stored === 'dark'
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-    }
-    return false
-  })
+  const [isDark, setIsDark] = useState<boolean>(true) // Force dark mode for hacker theme by default
 
-  // Apply dark class to html element and persist preference
+  // Apply dark class to html element
   useEffect(() => {
     const root = document.documentElement
-    if (isDark) {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-    localStorage.setItem('nova-dashboard-theme', isDark ? 'dark' : 'light')
-  }, [isDark])
+    root.classList.add('dark')
+    localStorage.setItem('nova-dashboard-theme', 'dark')
+  }, [])
 
-  const toggleTheme = () => setIsDark((prev) => !prev)
+  const toggleTheme = () => setIsDark(true) // Locked to dark for this aesthetic
   const toggleCollapse = () => setIsCollapsed((prev) => !prev)
   const sidebarWidth = isCollapsed ? '68px' : '260px'
 
-  // Sync sidebar width with footer on the document element
   useEffect(() => {
     document.documentElement.style.setProperty('--sidebar-width', sidebarWidth)
-    return () => {
-      document.documentElement.style.removeProperty('--sidebar-width')
-    }
+    return () => document.documentElement.style.removeProperty('--sidebar-width')
   }, [sidebarWidth])
-
-  // Sync with system preference changes
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const handler = (e: MediaQueryListEvent) => {
-      const stored = localStorage.getItem('nova-dashboard-theme')
-      if (!stored) {
-        setIsDark(e.matches)
-      }
-    }
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
 
   // Fetch user profile data from backend
   useEffect(() => {
@@ -80,409 +136,264 @@ const Dashboard: React.FC = () => {
       try {
         const token = await getToken()
         if (!token) return
-
-        const response = await fetch('/api/auth/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const response = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
         const data = await response.json()
         if (data.success && data.user) {
-          setUserPoints(data.user.points ?? 0)
+          if (data.user.points !== undefined) setUserPoints(data.user.points)
           setUserRole(data.user.role ?? 'student')
         }
       } catch {
-        // Backend might be offline — use defaults
+        // Backend offline — use defaults
       }
     }
-
     fetchProfile()
   }, [user, getToken])
 
-  const getGreeting = (): string => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Good morning'
-    if (hour < 17) return 'Good afternoon'
-    return 'Good evening'
-  }
-
-  const displayName = user?.fullName || user?.username || 'there'
-  const initials = displayName.charAt(0).toUpperCase()
+  const displayName = user?.fullName || user?.username || 'GUEST_USER'
+  const initials = displayName.substring(0, 2).toUpperCase()
   const profileImage = user?.imageUrl
 
   const sectionHeader = (title: string, desc: string) => (
     <div className="mb-7">
-      <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 m-0 tracking-tight">
+      <h1 className="text-2xl md:text-3xl font-bold text-slate-100 m-0 tracking-tight font-mono uppercase">
         {title}
       </h1>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1.5 m-0">{desc}</p>
+      <p className="text-sm text-slate-400 mt-1.5 m-0 font-mono">{desc}</p>
     </div>
   )
 
   const emptyState = (icon: React.ReactNode, title: string, desc: string) => (
-    <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-      <CardContent className="flex flex-col items-center justify-center py-20 px-6 text-center">
-        <div className="text-zinc-200 dark:text-zinc-700 mb-5">{icon}</div>
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 m-0 mb-2">
-          {title}
-        </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 m-0 max-w-xs leading-relaxed">
-          {desc}
-        </p>
-      </CardContent>
-    </Card>
-  )
-
-  // --- OVERVIEW SECTION ---
-
-  // Notion-style greeting header — clean typography, no card
-  const GreetingHeader = () => (
-    <div className="mb-8">
-      <div className="flex items-center gap-3 mb-1">
-        <Avatar className="size-10 ring-1 ring-zinc-200 dark:ring-zinc-700">
-          {profileImage ? (
-            <AvatarImage src={profileImage} alt={displayName} />
-          ) : (
-            <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-sm font-semibold">
-              {initials}
-            </AvatarFallback>
-          )}
-        </Avatar>
-        <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-zinc-100 m-0 tracking-tight">
-          Hello, {displayName}!
-        </h1>
-      </div>
-      <p className="text-sm text-zinc-400 dark:text-zinc-500 m-0 ml-[52px]">
-        {getGreeting()}. Here's what's happening with NOVA.
+    <div className="flex flex-col items-center justify-center py-20 px-6 text-center bg-slate-900 border border-slate-800 rounded-2xl border-dashed">
+      <div className="text-slate-700 mb-5">{icon}</div>
+      <h3 className="text-base font-semibold text-slate-300 font-mono m-0 mb-2 uppercase">
+        {title}
+      </h3>
+      <p className="text-sm text-slate-500 m-0 max-w-xs leading-relaxed font-mono">
+        {desc}
       </p>
     </div>
   )
 
-  // Build carousel slides from the typed config
-  const announcementSlides = buildAnnouncementSlides()
-  const activitySlides = buildActivitySlides({ points: userPoints })
-
-  interface StatCardProps {
-    icon: React.ReactNode
-    value: string | number
-    label: string
-    trend?: string
-    trendUp?: boolean
-    color: 'emerald' | 'indigo' | 'amber' | 'pink'
-  }
-
-  const StatCard = ({ icon, value, label, trend, trendUp, color }: StatCardProps) => {
-    const accentMap = {
-      emerald: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', icon: 'text-emerald-600 dark:text-emerald-400' },
-      indigo: { bg: 'bg-indigo-50 dark:bg-indigo-950/50', icon: 'text-indigo-600 dark:text-indigo-400' },
-      amber: { bg: 'bg-amber-50 dark:bg-amber-950/50', icon: 'text-amber-600 dark:text-amber-400' },
-      pink: { bg: 'bg-pink-50 dark:bg-pink-950/50', icon: 'text-pink-600 dark:text-pink-400' },
-    }
-    const a = accentMap[color]
-    return (
-      <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:shadow-md dark:hover:shadow-black/30 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div
-              className={cn(
-                'size-9 rounded-lg flex items-center justify-center',
-                a.bg,
-                a.icon
-              )}
-            >
-              {icon}
-            </div>
-            {trend && (
-              <div
-                className={cn(
-                  'flex items-center gap-1 text-xs font-medium',
-                  trendUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400 dark:text-zinc-500'
-                )}
-              >
-                <TrendingUp className="size-3.5" />
-                {trend}
-              </div>
-            )}
-          </div>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 m-0 mb-0.5 tracking-tight">
-            {value}
-          </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 m-0">{label}</p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  const QuickLinks = () => (
-    <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-      <CardHeader className="pb-3 px-6 pt-6">
-        <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-          Quick Links
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-6 pb-6 pt-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {[
-            { label: 'Browse Events', href: '/events', icon: CalendarCheck },
-            { label: 'View Sprints', href: '/sprints', icon: GitBranch },
-            { label: 'Visit Ideasprint', href: '/ideasprint', icon: Star },
-            { label: 'See Announcements', href: '/announcements', icon: Bell },
-          ].map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-md text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
-            >
-              <link.icon className="size-4 text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" />
-              <span>{link.label}</span>
-              <ArrowRight className="size-3.5 ml-auto text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors" />
-            </a>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
+  // --- OVERVIEW SECTION (GAMIFIED) ---
 
   const OverviewSection = () => (
-    <div className="animate-[dashFadeIn_0.35s_ease]">
-      <GreetingHeader />
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 animate-[dashFadeIn_0.35s_ease]">
+      {/* Central Feed - Left 2 Columns */}
+      <div className="xl:col-span-2 space-y-10">
+        
+        {/* Hacker Greeting */}
+        <div className="mb-2 border-b border-slate-800 pb-6">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-100 m-0 tracking-tight font-mono">
+            SYS_INIT: <span className="text-emerald-400">{displayName}</span>
+          </h1>
+          <p className="text-sm text-slate-500 m-0 mt-2 font-mono flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            SECURE_CONNECTION_ESTABLISHED // WORKSPACE_ONLINE
+          </p>
+        </div>
+        
+        {/* Notion-style Activity Board */}
+        <div>
+           <div className="flex items-center justify-between mb-4">
+             <h2 className="text-sm font-mono font-bold text-slate-300 tracking-wider flex items-center gap-2 uppercase">
+                <Terminal className="size-4 text-emerald-400" />
+                Activity_Stream
+             </h2>
+           </div>
+           
+           <div className="flex overflow-x-auto snap-x snap-mandatory pb-4 space-x-5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-slate-900/50 [&::-webkit-scrollbar-thumb]:bg-slate-700/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-emerald-500/50 transition-colors">
+              <TimelineCard 
+                 tag="NEW EVENT" 
+                 title="Agentathon 2025" 
+                 desc="Registration is now open for the ultimate AI Agent hackathon. Form your team and build the future." 
+                 date="Today, 09:00 AM" 
+                 status="active"
+              />
+              <TimelineCard 
+                 tag="SYSTEM" 
+                 title="Platform Update v2.1" 
+                 desc="New gamified dashboard and MvsrChatbot AI integration released to all students." 
+                 date="Yesterday, 14:30 PM" 
+                 status="completed"
+              />
+              <TimelineCard 
+                 tag="MILESTONE" 
+                 title="Sprint 4 Kickoff" 
+                 desc="Join the community call in the NOVA discord to discuss next sprint targets." 
+                 date="Upcoming" 
+                 status="pending"
+              />
+              {/* Empty placeholder to ensure no blank spaces */}
+              <div className="min-w-[280px] shrink-0 snap-start h-full min-h-[180px] flex flex-col items-center justify-center border border-dashed border-slate-800 rounded-xl bg-slate-900/20 text-slate-600 font-mono text-sm gap-2">
+                <Clock className="size-5 opacity-50" />
+                AWAITING_DATA...
+              </div>
+           </div>
+        </div>
 
-      {/* Announcements — one at a time, full width */}
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 m-0 mb-3 tracking-tight">
-          Announcements
-        </h2>
-        <CarouselSlider
-          items={announcementSlides}
-          autoPlay
-          interval={6000}
-          id="dashboard-announcements"
-          viewMode="single"
-        />
-      </div>
-
-      {/* Activity cards — multiple visible, free-scroll */}
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 m-0 mb-3 tracking-tight">
-          Activity
-        </h2>
-        <CarouselSlider
-          items={activitySlides}
-          viewMode="multi"
-          minItemWidth={280}
-          id="dashboard-activity"
-        />
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 m-0 mb-3 tracking-tight">
-          Overview
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard
-            icon={<CalendarCheck className="size-4" />}
-            value={0}
-            label="Registered Events"
-            trend="+0%"
-            trendUp={false}
-            color="emerald"
-          />
-          <StatCard
-            icon={<GitBranch className="size-4" />}
-            value={0}
-            label="Submissions"
-            trend="—"
-            color="indigo"
-          />
-          <StatCard
-            icon={<Star className="size-4" />}
-            value={userPoints}
-            label="Total Points"
-            trend="+0"
-            trendUp={false}
-            color="amber"
-          />
-          <StatCard
-            icon={<Medal className="size-4" />}
-            value="—"
-            label="Leaderboard Rank"
-            color="pink"
-          />
+        {/* Active Modules Track */}
+        <div>
+           <div className="flex items-center justify-between mb-4">
+             <h2 className="text-sm font-mono font-bold text-slate-300 tracking-wider flex items-center gap-2 uppercase">
+                <Cpu className="size-4 text-purple-400" />
+                Active_Modules
+             </h2>
+           </div>
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+               <ModuleCard icon={<CalendarCheck />} label="EVENTS" value="02" glow="emerald" />
+               <ModuleCard icon={<GitBranch />} label="OPEN_PRs" value="05" glow="indigo" />
+               <ModuleCard icon={<Star />} label="TOTAL_XP" value={userPoints.toString()} glow="amber" />
+               <ModuleCard icon={<Medal />} label="RANKING" value="#42" glow="pink" />
+           </div>
+        </div>
+        
+        {/* Quick Links Footer style */}
+        <div className="pt-6 border-t border-slate-800">
+           <div className="flex flex-wrap gap-3">
+              <a href="/events" className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition-colors flex items-center gap-2">
+                 <CalendarCheck className="size-3" /> BROWSE_EVENTS
+              </a>
+              <a href="/sprints" className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono text-slate-300 hover:text-purple-400 hover:border-purple-500/50 transition-colors flex items-center gap-2">
+                 <GitBranch className="size-3" /> VIEW_SPRINTS
+              </a>
+           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <QuickLinks />
+      {/* Gamified Profile - Right 1 Column */}
+      <div className="xl:col-span-1 space-y-6">
+         
+         {/* Profile Widget */}
+         <div className="relative p-[1px] rounded-2xl bg-gradient-to-b from-slate-700/50 to-slate-900/50 overflow-hidden group">
+            <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
+            <div className="relative bg-slate-950 p-6 rounded-2xl border border-slate-800/50 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+               <div className="flex justify-between items-start mb-6">
+                  <div className="flex gap-4 items-center">
+                     <div className="relative">
+                        <Avatar className="size-14 ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-slate-900">
+                          {profileImage ? (
+                            <AvatarImage src={profileImage} alt={displayName} />
+                          ) : (
+                            <AvatarFallback className="bg-slate-900 text-emerald-400 font-mono font-bold text-lg">
+                              {initials}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div className="absolute -bottom-1 -right-1 size-3.5 bg-emerald-500 rounded-full border-2 border-slate-950 animate-pulse" />
+                     </div>
+                     <div>
+                        <h3 className="font-mono font-bold text-slate-100 tracking-tight line-clamp-1">{displayName}</h3>
+                        <p className="font-mono text-[10px] text-emerald-400 mt-0.5 tracking-wider">LVL 1 DEVELOPER</p>
+                     </div>
+                  </div>
+               </div>
 
-        <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-          <CardHeader className="pb-3 px-6 pt-6">
-            <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Latest Updates
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6 pt-0">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed m-0">
-              Stay tuned for upcoming events, hackathons, and community
-              activities. Check the{' '}
-              <a
-                href="/events"
-                className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 underline underline-offset-2 font-medium"
-              >
-                Events page
-              </a>{' '}
-              for what's coming next.
-            </p>
-            <div className="mt-4 flex items-center gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700">
-              <Clock className="size-4 text-zinc-400 dark:text-zinc-500 shrink-0" />
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                No recent updates — check back soon
-              </span>
+               {/* XP Bar */}
+               <div className="space-y-2 mt-8">
+                  <div className="flex justify-between font-mono text-[10px] text-slate-400 uppercase tracking-widest">
+                     <span className="text-emerald-400 font-bold">{userPoints} XP</span>
+                     <span>1000 XP (LVL 2)</span>
+                  </div>
+                  <div className="h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800 relative">
+                     <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((userPoints / 1000) * 100, 100)}%` }}
+                        transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 relative"
+                     >
+                        <div className="absolute inset-0 bg-white/20 w-full animate-[pulse_2s_infinite]" />
+                     </motion.div>
+                  </div>
+               </div>
             </div>
-          </CardContent>
-        </Card>
+         </div>
+
+         {/* Reward Shelf */}
+         <div className="bg-slate-950 border border-slate-800 p-6 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+            <h3 className="font-mono font-semibold text-slate-300 text-sm mb-5 flex items-center gap-2 uppercase tracking-wider">
+               <Trophy className="size-4 text-amber-500" />
+               Badge_Shelf
+            </h3>
+            <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-3 gap-4">
+               <BadgeIcon active icon={<Code />} color="text-emerald-400" bg="bg-emerald-500/10" border="border-emerald-500/30" tooltip="Agentathon 2025" />
+               <BadgeIcon active icon={<GitBranch />} color="text-purple-400" bg="bg-purple-500/10" border="border-purple-500/30" tooltip="First PR Merged" />
+               <BadgeIcon active={false} icon={<Star />} tooltip="Samvarthan 2026" />
+               <BadgeIcon active={false} icon={<Cpu />} tooltip="Hardware Sprint" />
+               <BadgeIcon active={false} icon={<Terminal />} tooltip="CLI Master" />
+               {/* Empty Placeholder slots to fill the shelf visually */}
+               <div className="aspect-square rounded-xl border border-dashed border-slate-800/50 bg-slate-900/20" />
+            </div>
+         </div>
+
+         {/* Local Terminal Hint */}
+         <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-xl text-xs font-mono text-slate-500 leading-relaxed">
+            <span className="text-emerald-500/70 mr-2">&gt;</span>
+            Use the chat terminal on the bottom right to interface directly with the MVSR AI knowledge matrix.
+         </div>
+
       </div>
     </div>
   )
 
-  // --- PROFILE SECTION ---
+  // --- OTHER SECTIONS (Maintained for routing, restyled for dark mode) ---
 
   const ProfileSection = () => (
     <div className="animate-[dashFadeIn_0.35s_ease]">
-      {sectionHeader('My Profile', 'View and manage your personal details')}
-
+      {sectionHeader('Sys_Config: Profile', 'Manage local user parameters')}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 lg:col-span-2">
-          <CardHeader className="pb-3 px-6 pt-6">
-            <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <User className="size-4 text-zinc-400 dark:text-zinc-500" />
-              Account Information
+        <Card className="border-slate-800 bg-slate-950 lg:col-span-2">
+          <CardHeader className="pb-3 px-6 pt-6 border-b border-slate-900 mb-4">
+            <CardTitle className="text-sm font-mono font-semibold text-slate-300 flex items-center gap-2 uppercase">
+              <User className="size-4 text-slate-500" /> Core_Parameters
             </CardTitle>
           </CardHeader>
           <CardContent className="px-6 pb-6 pt-0">
             <div className="space-y-1">
-              <InfoRow label="Name" value={user?.fullName || 'Not set'} />
-              <InfoRow
-                label="Email"
-                value={user?.emailAddresses?.[0]?.emailAddress || 'Not set'}
-              />
-              <InfoRow label="Username" value={user?.username || 'Not set'} />
-              <InfoRow label="Role" value={userRole === 'admin' ? 'Admin' : 'Member'} />
-              <InfoRow
-                label="Member since"
-                value={
-                  user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })
-                    : '—'
-                }
-              />
+              <InfoRow label="NAME" value={user?.fullName || 'NULL'} />
+              <InfoRow label="EMAIL" value={user?.emailAddresses?.[0]?.emailAddress || 'NULL'} />
+              <InfoRow label="USERNAME" value={user?.username || 'NULL'} />
+              <InfoRow label="PRIVILEGE" value={userRole === 'admin' ? 'ROOT' : 'USER'} />
             </div>
           </CardContent>
         </Card>
-
-        <div className="space-y-4">
-          <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <CardHeader className="pb-3 px-5 pt-5">
-              <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <ExternalLink className="size-4 text-zinc-400 dark:text-zinc-500" />
-                Edit Profile
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 pt-0">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed m-0">
-                Your profile is managed through Clerk. Click your avatar in the
-                top-right to update your name, email, and photo.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <CardHeader className="pb-3 px-5 pt-5">
-              <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <Shield className="size-4 text-zinc-400 dark:text-zinc-500" />
-                Account Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 pt-0">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed m-0">
-                Authentication is handled securely via Clerk. Use the user menu
-                to manage your password and security settings.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   )
 
-  // --- EVENTS SECTION ---
-
   const EventsSection = () => (
     <div className="animate-[dashFadeIn_0.35s_ease]">
-      {sectionHeader('My Events', "Events you've registered for")}
+      {sectionHeader('Event_Log', "Registered global subroutines")}
       {emptyState(
-        <CalendarCheck className="size-14" />,
-        'No events yet',
-        "You haven't registered for any events yet. Browse upcoming events and join the community!"
+        <CalendarCheck className="size-10" />,
+        'NO_EVENTS_FOUND',
+        "Query returned 0 results. Browse the global event registry to attach."
       )}
     </div>
   )
-
-  // --- SUBMISSIONS SECTION ---
 
   const SubmissionsSection = () => (
     <div className="animate-[dashFadeIn_0.35s_ease]">
-      {sectionHeader('My Submissions', 'Your hackathon and sprint submissions')}
+      {sectionHeader('Commit_History', 'Committed projects and hacks')}
       {emptyState(
-        <GitBranch className="size-14" />,
-        'No submissions yet',
-        'Submit your first project during the next hackathon or sprint event.'
+        <GitBranch className="size-10" />,
+        'NO_COMMITS_YET',
+        'Repository empty. Awaiting first submission payload.'
       )}
     </div>
   )
 
-  // --- SETTINGS SECTION ---
-
   const SettingsSection = () => (
     <div className="animate-[dashFadeIn_0.35s_ease]">
-      {sectionHeader('Settings', 'Account and notification preferences')}
-
+      {sectionHeader('Security & Prefs', 'System configuration tuning')}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-          <CardHeader className="pb-3 px-6 pt-6">
-            <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <Bell className="size-4 text-zinc-400 dark:text-zinc-500" />
-              Notifications
+        <Card className="border-slate-800 bg-slate-950">
+          <CardHeader className="pb-3 px-6 pt-6 border-b border-slate-900 mb-4">
+            <CardTitle className="text-sm font-mono font-semibold text-slate-300 flex items-center gap-2 uppercase">
+              <Shield className="size-4 text-slate-500" /> Auth_Gateway
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-6 pb-6 pt-0">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed m-0">
-              Notification preferences are coming soon. You'll be able to manage
-              email updates and event reminders here.
-            </p>
-            <div className="mt-4 flex items-center gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700">
-              <Clock className="size-4 text-zinc-400 dark:text-zinc-500 shrink-0" />
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">Coming soon</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-          <CardHeader className="pb-3 px-6 pt-6">
-            <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <Lock className="size-4 text-zinc-400 dark:text-zinc-500" />
-              Account Security
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6 pt-0">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed m-0">
-              Your account is managed through Clerk, providing secure
-              authentication. To update your password or manage security
-              settings, use the Clerk user menu.
-            </p>
+          <CardContent className="px-6 pb-6 pt-0 font-mono text-sm text-slate-500">
+            Authentication is handled via external Clerk provider. Local modifications disabled.
           </CardContent>
         </Card>
       </div>
@@ -491,52 +402,37 @@ const Dashboard: React.FC = () => {
 
   const renderSection = () => {
     switch (activeSection) {
-      case 'overview':
-        return <OverviewSection />
-      case 'profile':
-        return <ProfileSection />
-      case 'events':
-        return <EventsSection />
-      case 'submissions':
-        return <SubmissionsSection />
-      case 'settings':
-        return <SettingsSection />
-      default:
-        return null
+      case 'overview': return <OverviewSection />
+      case 'profile': return <ProfileSection />
+      case 'events': return <EventsSection />
+      case 'submissions': return <SubmissionsSection />
+      case 'settings': return <SettingsSection />
+      default: return null
     }
+  }
+
+  function InfoRow({ label, value }: { label: string; value: string }) {
+    return (
+      <div className="flex items-center gap-3 py-3 border-b border-slate-800/50 last:border-0">
+        <span className="text-xs font-mono text-slate-500 min-w-[120px] shrink-0 uppercase tracking-widest">{label}</span>
+        <span className="text-sm font-mono text-slate-300 font-medium">{value}</span>
+      </div>
+    )
   }
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-        <div className="flex items-center justify-center min-h-screen text-zinc-400 dark:text-zinc-500 text-sm">
-          <svg
-            className="animate-spin size-5 mr-3 text-emerald-500"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            />
-          </svg>
-          Loading dashboard...
-        </div>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500 text-sm font-mono">
+        <Terminal className="size-5 mr-3 text-emerald-500 animate-pulse" />
+        BOOTING_WORKSPACE...
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex min-h-screen bg-[#020617] text-slate-300 selection:bg-emerald-500/30 font-sans">
+      
+      {/* Existing Sidebar - forced into dark theme implicitly by wrapping background */}
       <DashboardSidebar
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -546,25 +442,16 @@ const Dashboard: React.FC = () => {
         isCollapsed={isCollapsed}
         onToggleCollapse={toggleCollapse}
       />
+      
       <main className={cn(
-        'flex-1 min-h-screen transition-all duration-300 pt-20 md:pt-24',
+        'flex-1 min-h-screen transition-all duration-300 pt-20 md:pt-24 bg-slate-950',
         isCollapsed ? 'md:ml-[68px]' : 'md:ml-[260px]'
       )}>
-        <div className="max-w-6xl px-5 py-8 md:px-8 md:py-10 mx-auto">
+        <div className="max-w-7xl px-5 py-8 md:px-8 md:py-10 mx-auto">
           {renderSection()}
         </div>
       </main>
-    </div>
-  )
-}
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
-      <span className="text-sm text-zinc-500 dark:text-zinc-400 min-w-[120px] shrink-0">
-        {label}
-      </span>
-      <span className="text-sm text-zinc-800 dark:text-zinc-200 font-medium">{value}</span>
     </div>
   )
 }

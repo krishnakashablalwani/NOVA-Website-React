@@ -14,6 +14,7 @@ import IdeasprintPage from './pages/IdeasprintPage'
 import Events from './pages/Events'
 import Announcements from './pages/Announcements'
 import Dashboard from './pages/Dashboard'
+import GlobalChatbot from './components/GlobalChatbot'
 import { SignInPage, SignUpPage } from './pages/SignIn'
 
 const Rules: React.FC = (): React.JSX.Element => <div>Rules Page</div>
@@ -69,6 +70,9 @@ const AppContent: React.FC = (): React.JSX.Element => {
       >
         <Footer />
       </div>
+
+      {/* Global AI Chatbot Widget */}
+      <GlobalChatbot />
     </div>
   )
 }

@@ -24,7 +24,7 @@
 
 .page {
     padding: 0;
-    background-color: #1a1a1a;
+    background-color: var(--bg-primary);
     overflow: hidden;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -35,13 +35,13 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(to right, #1a1a1a 0%, #2a2a2a 5%, #1a1a1a 100%);
+    background: #060606;
     position: relative;
     box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.2);
     animation: pageFadeIn 0.8s ease-out forwards;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 200, 150, 0.3) transparent;
+    scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
 }
 
 .page-content::-webkit-scrollbar {
@@ -49,7 +49,7 @@
 }
 
 .page-content::-webkit-scrollbar-thumb {
-    background: rgba(0, 200, 150, 0.3);
+    background: rgba(99, 102, 241, 0.3);
     border-radius: 10px;
 }
 
@@ -66,9 +66,9 @@
 }
 
 .novathon-book .page.page-cover .page-content {
-    background: linear-gradient(135deg, #05070A, #0B2F2A, #1A1B3A);
+    background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary), var(--bg-primary));
     padding: 0;
-    border: 4px solid #00C896;
+    border: 4px solid var(--accent-indigo);
 }
 
 .cover-design {
@@ -87,7 +87,7 @@
     position: absolute;
     width: 200px;
     height: 200px;
-    background: #00C896;
+    background: var(--accent-indigo);
     filter: blur(100px);
     opacity: 0.3;
 }
@@ -98,8 +98,8 @@
     margin-bottom: 20px;
     border-radius: 50%;
     overflow: hidden;
-    border: 2px solid #00C896;
-    box-shadow: 0 0 20px rgba(0, 200, 150, 0.4);
+    border: 2px solid var(--accent-indigo);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
 }
 
 .cover-logo {
@@ -111,15 +111,15 @@
 .cover-design h2 {
     font-size: 2.5rem;
     font-weight: 900;
-    color: #ffffff;
+    color: var(--text-main);
     margin: 0;
     letter-spacing: 3px;
-    text-shadow: 0 0 20px rgba(0, 200, 150, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .cover-design h3 {
     font-size: 1.1rem;
-    color: #00C896;
+    color: var(--accent-indigo);
     margin-top: 5px;
     letter-spacing: 1px;
 }
@@ -134,7 +134,7 @@
 
 .page-title {
     font-size: 1.5rem;
-    color: #00C896;
+    color: var(--accent-indigo);
     margin-bottom: 15px;
     font-weight: 800;
     position: relative;
@@ -148,20 +148,20 @@
     left: 0;
     width: 40px;
     height: 3px;
-    background: #00C896;
+    background: var(--accent-indigo);
 }
 
 .event-description {
     font-size: 0.95rem;
     line-height: 1.6;
-    color: #e6edf3;
+    color: var(--text-main);
     margin-bottom: 15px;
     text-align: justify;
 }
 
 .problem-statements h3 {
     font-size: 1.2rem;
-    color: #ffffff;
+    color: var(--text-main);
     margin-bottom: 15px;
 }
 
@@ -174,9 +174,9 @@
     padding: 10px 15px;
     background: rgba(255, 255, 255, 0.05);
     margin-bottom: 10px;
-    border-left: 3px solid #00C896;
+    border-left: 3px solid var(--accent-indigo);
     font-size: 0.95rem;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .about-visual {
@@ -191,14 +191,14 @@
     margin-top: 15px;
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgba(0, 200, 150, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.2);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     transition: transform 0.3s ease;
 }
 
 .event-poster-container:hover {
     transform: translateY(-5px);
-    border-color: rgba(0, 200, 150, 0.5);
+    border-color: rgba(99, 102, 241, 0.5);
 }
 
 .event-poster-img {
@@ -209,8 +209,8 @@
 
 .team-badge {
     font-size: 0.75rem;
-    color: #00C896;
-    background: rgba(0, 200, 150, 0.1);
+    color: var(--accent-indigo);
+    background: rgba(99, 102, 241, 0.1);
     padding: 2px 8px;
     border-radius: 4px;
     margin-top: 5px;
@@ -225,24 +225,24 @@
 }
 
 .stat-card {
-    background: rgba(0, 200, 150, 0.05);
+    background: rgba(99, 102, 241, 0.05);
     padding: 15px;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid rgba(0, 200, 150, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.1);
 }
 
 .stat-value {
     font-size: 1.8rem;
     font-weight: 900;
-    color: #ffffff;
+    color: var(--text-main);
 }
 
 .stat-label {
     font-size: 0.9rem;
-    color: #00C896;
+    color: var(--accent-indigo);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 5px;
@@ -330,7 +330,7 @@
 
 .book-project-card:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(0, 200, 150, 0.2);
+    border-color: rgba(99, 102, 241, 0.2);
     transform: translateX(5px);
 }
 
@@ -343,13 +343,13 @@
 
 .project-info h4 {
     font-size: 1rem;
-    color: #ffffff;
+    color: var(--text-main);
     margin-bottom: 5px;
 }
 
 .project-info p {
     font-size: 0.85rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     line-height: 1.4;
 }
 
@@ -387,7 +387,7 @@
 
 .mini-desc {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     line-height: 1.4;
     margin-bottom: 15px;
 }
@@ -413,7 +413,7 @@
 }
 
 .book-btn.primary {
-    background: #00C896;
+    background: var(--accent-indigo);
     color: #000;
 }
 
@@ -429,8 +429,8 @@
 
 .team-tag {
     font-size: 0.7rem;
-    background: rgba(0, 200, 150, 0.1);
-    color: #00C896;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-indigo);
     padding: 2px 6px;
     border-radius: 3px;
     margin-left: 8px;
@@ -441,7 +441,7 @@
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    color: #00C896;
+    color: var(--accent-indigo);
     opacity: 0.5;
     margin-top: 50px;
 }
@@ -461,9 +461,9 @@
     gap: 15px;
     align-items: center;
     padding: 12px;
-    background: rgba(0, 200, 150, 0.05);
+    background: rgba(99, 102, 241, 0.05);
     border-radius: 10px;
-    border: 1px solid rgba(0, 200, 150, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.1);
 }
 
 .winner-medal {
@@ -473,20 +473,20 @@
 }
 
 .winner-details h4 {
-    color: #ffffff;
+    color: var(--text-main);
     margin-bottom: 2px;
 }
 
 .winner-details p {
     font-size: 0.8rem;
-    color: #00C896;
+    color: var(--accent-indigo);
     text-transform: uppercase;
 }
 
 .winner-project {
     display: block;
     font-size: 0.85rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     margin-top: 5px;
 }
 
@@ -526,7 +526,7 @@
     flex: 1;
     overflow: hidden;
     border-radius: 12px;
-    border: 1px solid rgba(0, 200, 150, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.2);
     background: rgba(0, 0, 0, 0.5);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
@@ -548,8 +548,8 @@
     height: calc(100% - 40px);
     border-radius: 15px;
     overflow: hidden;
-    border: 2px solid #00C896;
-    box-shadow: 0 0 40px rgba(0, 200, 150, 0.3);
+    border: 2px solid var(--accent-indigo);
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
 }
 
 .finale-img-large {
@@ -567,12 +567,12 @@
     backdrop-filter: blur(10px);
     padding: 10px;
     text-align: center;
-    color: #00C896;
+    color: var(--accent-indigo);
     font-size: 0.9rem;
     font-weight: 800;
     letter-spacing: 2px;
     border-radius: 8px;
-    border: 1px solid rgba(0, 200, 150, 0.3);
+    border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 /* Project Description Modal */
@@ -592,26 +592,26 @@
 }
 
 .book-modal-content {
-    background: #1a1a1a;
+    background: var(--bg-primary);
     padding: 30px;
     border-radius: 15px;
     width: 90%;
     max-width: 450px;
-    border: 1px solid #00C896;
-    box-shadow: 0 0 50px rgba(0, 200, 150, 0.3);
+    border: 1px solid var(--accent-indigo);
+    box-shadow: 0 0 50px rgba(99, 102, 241, 0.3);
     position: relative;
     animation: slideUp 0.3s ease-out;
 }
 
 .book-modal-content h3 {
-    color: #00C896;
+    color: var(--accent-indigo);
     font-size: 1.4rem;
     margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
 }
 
 .book-modal-content p {
-    color: #e6edf3;
+    color: var(--text-main);
     line-height: 1.6;
     font-size: 1rem;
     margin-bottom: 25px;
@@ -666,7 +666,7 @@
 }
 
 .nav-btn:hover {
-    background: #00C896;
+    background: var(--accent-indigo);
     transform: scale(1.1);
 }
 
