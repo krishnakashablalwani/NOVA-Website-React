@@ -19,6 +19,7 @@ export default defineConfig({
       },
     }),
     VitePWA({
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
       includeAssets: ['vite.svg'],
       manifest: {
@@ -30,14 +31,14 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'vite.svg',
+            src: 'images/hero/anishay.png',
             sizes: '192x192',
-            type: 'image/svg+xml'
+            type: 'image/png'
           },
           {
-            src: 'vite.svg',
+            src: 'images/hero/anishay.png',
             sizes: '512x512',
-            type: 'image/svg+xml'
+            type: 'image/png'
           }
         ]
       },
@@ -50,13 +51,13 @@ export default defineConfig({
   server: {
     port: 3000, // Change this to whatever port you prefer
     open: true,  // Optional: automatically opens browser when dev server starts
-        proxy: {
+    allowedHosts: true, // Allow external hosts like localtunnel
+    proxy: {
       '/api': {
         target: 'http://localhost:3001'
       }
-  }
-
-},
+    }
+  },
    build: {
     outDir: 'dist',
     sourcemap: false, // Disable in production for smaller bundle

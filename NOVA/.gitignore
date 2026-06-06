@@ -28,3 +28,6 @@ dist-ssr
 .env.prodcution
 generate-credentials-cli.js
 stress-test.js
+
+# PWA
+dev-dist
