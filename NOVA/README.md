@@ -8,10 +8,12 @@
 ## 🚀 Product Thinking & Core Features
 
 ### Global AI Chatbot Widget
-The NOVA platform now features a globally accessible AI assistant that floats on the bottom-right of every view. 
+
+The NOVA platform now features a globally accessible AI assistant that floats on the bottom-right of every view.
 **Why extract it to be globally floating?** By placing the chatbot at the root of the application shell instead of burying it inside a specific dashboard, we maximize student utility. Students can now access immediate help, ask about MVSR Engineering College context, or get club information whether they are reading the mission statement, browsing the Event Book, or interacting with the dashboard—all without losing their place or context.
 
 ### Gamified Dashboard Layout
+
 The user dashboard abandons traditional, static layouts in favor of a highly gamified, "hacker-themed" dark aesthetic.
 **Why this layout?** NOVA is a club centered around hackathons, sprints, and tech community engagement. The gamified layout with real-time stats, interactive cards, and a sleek dark mode natively aligns with our target demographic (CS students and developers). It increases engagement, creates a sense of progression, and strongly reinforces the club's technical identity.
 
@@ -20,13 +22,15 @@ The user dashboard abandons traditional, static layouts in favor of a highly gam
 ## 🏗 Architecture Decisions
 
 ### Static RAG (Retrieval-Augmented Generation)
+
 For the AI Assistant, we explicitly implemented a **Static RAG approach** rather than building and managing a heavy vector database.
 **Why?** By fetching a pre-compiled `public/mvsr-knowledge.md` markdown file at runtime and injecting it directly into the Gemini API's system instructions, we successfully feed secure, localized context into the LLM. This provides highly accurate, MVSR-specific answers with **zero database spin-up overhead**, minimal latency, and zero maintenance costs for vector embeddings.
 
 ### Core Stack
-| Layer      | Technology                                                  |
-|------------|-------------------------------------------------------------|
-| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion|
+
+| Layer        | Technology                                                 |
+| ------------ | ---------------------------------------------------------- |
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion |
 | **Backend**  | Express 5 (Node.js), Clerk SDK, Supabase Admin, Notion API |
 | **Database** | Supabase (PostgreSQL) with Row-Level Security              |
 | **Auth**     | Clerk (email, Google, GitHub OAuth)                        |
@@ -36,13 +40,14 @@ For the AI Assistant, we explicitly implemented a **Static RAG approach** rather
 
 ## 🤖 Agentic AI Tools & Prompts
 
-During the development of this project, we heavily utilized AI productivity tools and agents to generate boilerplate, solve complex CSS layout issues, and implement LLM streaming features. 
+During the development of this project, we heavily utilized AI productivity tools and agents to generate boilerplate, solve complex CSS layout issues, and implement LLM streaming features.
 
 **Highlight Prompts Used:**
-- *"Extract the floating chatbot from Dashboard.tsx into a GlobalChatbot.tsx component and mount it in App.tsx so it persists across routes."* (Used to architect the global widget component without prop-drilling).
-- *"Implement real-time streaming using `ai.models.generateContentStream` for the Gemini SDK to create an authentic typewriter effect, and limit responses strictly to 200 words."* (Used to eliminate perceived latency and enforce strict UI token constraints).
-- *"Swap all `#00C896` and `#1a1a1a` hex codes in the EventBook CSS to match our dark blue Tailwind variables `var(--bg-primary)` using a Python regex script."* (Used for rapid theme normalization across legacy components).
-- *"Add a subtle hover animation to the team cards, make the images square, and replace the overlapping text with a glassmorphism panel beneath the photo."* (Used to rapidly iterate and fix complex UI overlaps).
+
+- _"Extract the floating chatbot from Dashboard.tsx into a GlobalChatbot.tsx component and mount it in App.tsx so it persists across routes."_ (Used to architect the global widget component without prop-drilling).
+- _"Implement real-time streaming using `ai.models.generateContentStream` for the Gemini SDK to create an authentic typewriter effect, and limit responses strictly to 200 words."_ (Used to eliminate perceived latency and enforce strict UI token constraints).
+- _"Swap all `#00C896` and `#1a1a1a` hex codes in the EventBook CSS to match our dark blue Tailwind variables `var(--bg-primary)` using a Python regex script."_ (Used for rapid theme normalization across legacy components).
+- _"Add a subtle hover animation to the team cards, make the images square, and replace the overlapping text with a glassmorphism panel beneath the photo."_ (Used to rapidly iterate and fix complex UI overlaps).
 
 ---
 

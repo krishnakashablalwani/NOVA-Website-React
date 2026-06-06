@@ -60,7 +60,7 @@ export default function MvsrChatbot() {
         model: 'gemini-2.5-flash',
         contents: userText,
         config: {
-          systemInstruction: `You are an expert AI assistant specialized in Maturi Venkata Subba Rao Engineering College (MVSR). Answer user prompts accurately using ONLY the provided knowledge text matrix. If it cannot be answered using this baseline file data, politely say you don't know. Keep your response concise and strictly limit your answer to a maximum of 200 words.\n\nKnowledge Text Matrix:\n${knowledgeBase}`,
+          systemInstruction: `You are an expert AI assistant specialized in Maturi Venkata Subba Rao Engineering College (MVSR). Answer user prompts accurately using ONLY the provided knowledge text matrix. If it cannot be answered using this baseline file data, politely say you don't know. Keep your response concise and helpful.\n\nKnowledge Text Matrix:\n${knowledgeBase}`,
         }
       });
 

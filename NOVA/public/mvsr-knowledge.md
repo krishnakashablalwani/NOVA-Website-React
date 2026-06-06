@@ -60,7 +60,7 @@
 
 ---
 
-##  SECTION 4: Digital Campus Infrastructure & Facilities
+## SECTION 4: Digital Campus Infrastructure & Facilities
 
 46. The entire campus layout is interconnected via a high-speed, centralized **Fiber-Optic network backbone**.
 47. Local local area networks utilize a securely isolated, enterprise-grade **Cisco Network architecture**.
@@ -115,7 +115,7 @@
 
 ---
 
-##  SECTION 6: Technical Fests, Campus Milestones & Accolades
+## SECTION 6: Technical Fests, Campus Milestones & Accolades
 
 91. **Samavarthan** is the premier, state-recognized Annual National Technical Fest hosted inside the MVSR campus parameter.
 92. **Samavarthan 2026** featured highly competitive, cross-department hackathons with a combined **prize pool valued at over Rs 20 Lakhs**.
@@ -126,4 +126,4 @@
 97. Mechanical engineering automotive innovators secured an elite **All India 10th Rank in the SAE BAJA** automotive engineering challenge.
 98. The campus **NCC Unit** achieved the decorated rank of **"Best Technical Unit"** within the combined AP & Telangana NCC Directorate.
 99. The IEEE-MVSR Student Chapter stands as one of the most active in the region, regularly securing global branch awards from the IEEE Hyderabad Chapter.
-100. Dr. D. Sirisha from the Computer Science Engineering department won the national **Dare to Dream Innovation Contest 2.0**, receiving the award directly from the Union Defence Minister.
+100.  Dr. D. Sirisha from the Computer Science Engineering department won the national **Dare to Dream Innovation Contest 2.0**, receiving the award directly from the Union Defence Minister.
