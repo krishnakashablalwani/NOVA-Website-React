@@ -39,10 +39,10 @@ export default function MvsrChatbot() {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (overrideText?: string | React.MouseEvent) => {
+    const userText = (typeof overrideText === 'string' ? overrideText : input).trim();
+    if (!userText) return;
     
-    const userText = input.trim();
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -50,7 +50,9 @@ export default function MvsrChatbot() {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    if (typeof overrideText !== 'string') {
+      setInput('');
+    }
     setIsLoading(true);
 
     try {
@@ -110,7 +112,6 @@ export default function MvsrChatbot() {
         </div>
         <div>
           <h2 className="text-lg font-semibold text-slate-100">MVSR AI Assistant</h2>
-          <p className="text-xs text-slate-400">Powered by Gemini 2.5 Flash</p>
         </div>
       </div>
 
@@ -160,6 +161,22 @@ export default function MvsrChatbot() {
           </motion.div>
         )}
         <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick Queries */}
+      <div className="px-4 pb-3 bg-slate-900/50">
+        <div className="flex flex-wrap gap-2">
+          {["What clubs are there?", "What is the next event?", "How can I join?", "Tell me about MVSR"].map((query, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSend(query)}
+              disabled={isLoading || !knowledgeBase}
+              className="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-slate-100 disabled:opacity-50 disabled:hover:bg-slate-800 disabled:hover:text-slate-300 transition-colors text-left"
+            >
+              {query}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Input Area */}

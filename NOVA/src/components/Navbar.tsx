@@ -4,6 +4,7 @@ import { UserButton, SignedIn, SignedOut, SignInButton } from '@clerk/clerk-reac
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import PwaInstallButton from './PwaInstallButton'
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -123,6 +124,8 @@ const Navbar: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
+          <PwaInstallButton />
+          
           <div className="hidden md:block">
             <Link
               to="/register"
